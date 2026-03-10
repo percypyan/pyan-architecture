@@ -10,17 +10,17 @@
 import SwiftUI
 import PyanArchitecture
 
-@MainActor
-struct SamplePreviewer: @MainActor Previewer {
-	let builder: SampleBuilder
-	let container: Container
+typealias SamplePreviewer = Previewer<SampleBuilder>
 
+extension SamplePreviewer {
 	init() {
-		self.builder = SampleBuilder(
+		self.init(
 			container: previewContainer,
-			rootProperties: .init(title: "Preview")
+			builder: .init(
+				container: previewContainer,
+				rootProperties: .init(title: "Hello World")
+			)
 		)
-		self.container = previewContainer
 	}
 }
 

@@ -8,6 +8,6 @@
 import SwiftUI
 import PyanArchitecture
 
-enum SampleModal: @MainActor BuildableModal {
+enum SampleModal: BuildableModal {
 	case showcaseModal
 }
