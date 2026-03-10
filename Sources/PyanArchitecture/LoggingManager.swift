@@ -44,6 +44,26 @@ public final class LoggingManager<Category: LogCategory, AppMetadataKey: Metadat
 		self.factory = .init(label: Self.label)
 	}
 
+	#if DEBUG
+	/// Creates a logging manager pre-configured with a mock log handler for testing.
+	///
+	/// This initializer immediately marks the manager as bootstrapped and routes all log
+	/// output to a ``MockLogHandler`` backed by the provided storage, making it
+	/// easy to assert on logged messages in unit tests.
+	///
+	/// - Parameter storage: The backing storage that captures log entries
+	///   produced by the mock handler.
+	///
+	///  > important: This initializer is only available in **Debug** builds.
+	public init(withMockStorage storage: MockLogHandler.Storage) {
+		self.isBootstrapped = true
+		self.isAutoBootstrapped = true
+		self.factory = .init(label: Self.label) { label, provider in
+			MockLogHandler(label: label, category: "Uncategorized", storage: storage)
+		}
+	}
+	#endif
+
 	/// Returns a logger for the given category.
 	/// 
 	/// - Parameter category: The log category to use.
