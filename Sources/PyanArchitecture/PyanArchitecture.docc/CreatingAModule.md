@@ -108,20 +108,22 @@ case .child:
 
 ### Setting Up Previews
 
-Create a ``Previewer`` that builds the module with an overridable
-container and mock services:
+Alias ``Previewer`` with a specialized `Builder` and provide a parameter-free init
+to access an easy way to show previews for a module:
 
 ```swift
 #if DEBUG
-struct MyPreviewer: Previewer {
-    let builder: MyBuilder
-    let container: Container
+typealias MyPreviewer = Previewer<MyBuilder>
 
+extension MyPreviewer {
     init() {
-        let container = Container(overridableDependencies: true)
-            .register(ProfileService.self, factory: { _ in MockProfileService() })
-        self.container = container
-        self.builder = MyBuilder(container: container)
+        let container = previewContainer // Any container setup for previews.
+        self.init(
+			container: container,
+			builder: .init(container: container),
+			// If the container already contains ``FeatureManager`` adapted for previews.
+			featureManager: <~container
+		)
     }
 }
 #endif
@@ -136,12 +138,11 @@ Then use it in `#Preview` blocks:
         .preview(screen: .home)
 }
 
-// Preview with an overridden dependency
+// Preview with overridden dependency and feature
 #Preview {
     MyPreviewer()
-        .register(ProfileService.self, factory: { _ in
-            MockProfileService(profile: .sample)
-        })
+        .register(type: ProfileService.self, MockProfileService(profile: .sample))
+		.constant(SomeFeature.self, enabled: false)
         .preview(screen: .home)
 }
 

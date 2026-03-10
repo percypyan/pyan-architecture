@@ -9,103 +9,195 @@
 
 import SwiftUI
 
-/// A type that simplifies Xcode Previews for a module.
+/// A helper that simplifies building SwiftUI previews for a module.
 ///
-/// Conforming types hold a ``ModuleBuilder`` and a ``Container`` with
-/// overridable dependencies, letting you quickly preview individual screens,
-/// modals, or an entire module while substituting mock services.
+/// `Previewer` wraps a ``ModuleBuilder`` and its dependency injection
+/// ``Container``, providing chainable methods to override services and
+/// feature flags before rendering a screen, modal, or full module in a
+/// `#Preview` block.
+///
+/// Create a typealias and an extension providing a parameter-free init for your
+/// module's builder to keep preview call sites concise:
 ///
 /// ```swift
-/// struct MyPreviewer: Previewer {
-///     let builder: MyBuilder
-///     let container: Container
+/// // In a `SamplePreviewer.swift` file:
 ///
-///     init() {
-///         let container = Container(overridableDependencies: true)
-///             .register(MyService.self, factory: { _ in MockMyService() })
-///         self.container = container
-///         self.builder = MyBuilder(container: container)
-///     }
-/// }
+/// typealias SamplePreviewer = Previewer<SampleBuilder>
+///
+///	extension SamplePreviewer {
+///		init() {
+///			self.init(
+///				container: someContainer,
+///				builder: .init(someContainer),
+///				// You can provide a base FeatureManager adapted for previews.
+///				featureManager: <~someContainer
+///			)
+///		}
+///	}
+///
+///	// Then in your preview location:
 ///
 /// #Preview {
-///     MyPreviewer()
-///         .register(AnalyticsService.self, factory: { _ in MockAnalytics() })
-///         .preview(screen: .home)
+///     SamplePreviewer()
+///         .constant(MyFeature.self, enabled: true)
+///         .previewModule()
 /// }
 /// ```
 @MainActor
-public protocol Previewer {
-	/// The module builder type this previewer wraps.
-	associatedtype Builder: ModuleBuilder
+public struct Previewer<Builder: ModuleBuilder> {
+	private let builder: Builder
+	private let container: Container
+	private let featureManager: FeatureManager?
+	private let constantFeatureManagerFactory: ConstantFeatureManagerFactory
 
-	/// The module builder used to build screens and modals.
-	var builder: Builder { get }
+	/// Creates a new previewer.
+	///
+	/// - Parameters:
+	///   - container: The dependency injection container the module uses. Must to be overridable.
+	///   - builder: The module builder that knows how to create screens and modals.
+	///   - featureManager: A feature manager to override (through multiplexing).
+	public init(
+		container: Container,
+		builder: Builder,
+		featureManager manager: FeatureManager
+	) {
+		self.container = container
+		self.builder = builder
+		self.featureManager = manager
+		self.constantFeatureManagerFactory = ConstantFeatureManagerFactory(isOverridable: true)
+	}
 
-	/// The container used to register and resolve dependencies for previews.
-	var container: Container { get }
-
-	/// Returns a preview of the given screen.
-	func preview(screen: Builder.ScreenKey) -> AnyView
-
-	/// Returns a preview of the given modal, optionally displayed over a background screen.
-	func preview(modal: Builder.ModalKey, over screen: Builder.ScreenKey?, showButtonAlignment: Alignment?) -> AnyView
-
-	/// Returns a preview of the entire module starting from the root screen.
-	func previewModule() -> AnyView
-
-	/// Registers a factory in the preview container and returns `self` for chaining.
-	func register<T>(_ type: T.Type, factory: @escaping (Container) -> T) -> Self
-
-	/// Registers an instance in the preview container and returns `self` for chaining.
-	func register<T>(type: T.Type, _ factory: @autoclosure @escaping () -> T) -> Self
-
-	/// Registers a singleton factory in the preview container and returns `self` for chaining.
-	func registerSingleton<T>(_ type: T.Type, factory: @escaping (Container) -> T) -> Self
-
-	/// Registers a singleton instance in the preview container and returns `self` for chaining.
-	func registerSingleton<T>(type: T.Type, _ factory: @autoclosure @escaping () -> T) -> Self
+	/// Creates a new previewer.
+	///
+	/// - Parameters:
+	///   - container: The dependency injection container the module uses. Must to be overridable.
+	///   - builder: The module builder that knows how to create screens and modals.
+	public init(
+		container: Container,
+		builder: Builder
+	) {
+		self.container = container
+		self.builder = builder
+		self.featureManager = nil
+		self.constantFeatureManagerFactory = ConstantFeatureManagerFactory(isOverridable: true)
+	}
 }
 
-@MainActor
-struct PreviewWithFeatureManager<Content: View>: View {
-	let featureManager: FeatureManager?
+// MARK: FeatureManager boostrapping
+
+struct PreviewFeatureManagerBoostrapper<Content: View>: View {
+	let featureManager: FeatureManager
 	let content: () -> Content
 
 	var body: some View {
 		let featureManager = featureManager
 		Group {
-			if featureManager?.isReady ?? true {
+			if featureManager.isReady {
 				content()
+			} else {
+				ProgressView {
+					Text("Loading preview...")
+				}
 			}
 		}
-		.task { try! await featureManager?.bootstrap() }
+		.task {
+			guard !featureManager.isReady else { return }
+			try! await featureManager.bootstrap()
+		}
 	}
 }
 
 // MARK: Preview methods
 
 public extension Previewer {
+	/// Returns a view that previews a single screen of the module.
+	///
+	/// Registers the mock feature manager into the container before
+	/// building the screen.
+	///
+	/// - Parameter screen: The screen key identifying which screen to preview.
+	/// - Returns: A type-erased view of the requested screen.
 	func preview(screen: Builder.ScreenKey) -> AnyView {
-		return AnyView(PreviewWithFeatureManager(featureManager: <~container) {
+		registerFeatureManager()
+		return AnyView(PreviewFeatureManagerBoostrapper(featureManager: <~container) {
 			builder.previewScreen(screen)
 		})
 	}
 
+	/// Returns a view that previews a modal, optionally displayed over a screen.
+	///
+	/// Registers the mock feature manager into the container before
+	/// building the modal.
+	///
+	/// - Parameters:
+	///   - modal: The modal key identifying which modal to preview.
+	///   - screen: An optional screen to display behind the modal. When `nil`,
+	///     the modal is shown on its own.
+	///   - showButtonAlignment: An optional alignment for the button that
+	///     triggers the modal presentation.
+	/// - Returns: A type-erased view of the modal preview.
 	func preview(
 		modal: Builder.ModalKey,
 		over screen: Builder.ScreenKey? = nil,
 		showButtonAlignment: Alignment? = nil
 	) -> AnyView {
-		return AnyView(PreviewWithFeatureManager(featureManager: <~container) {
+		registerFeatureManager()
+		return AnyView(PreviewFeatureManagerBoostrapper(featureManager: <~container) {
 			builder.previewModal(modal, over: screen, showButtonAlignment: showButtonAlignment)
 		})
 	}
 
+	/// Returns a view that previews the full module starting from its root.
+	///
+	/// Registers the mock feature manager into the container before
+	/// building the module root.
+	///
+	/// - Returns: A type-erased view of the module's root navigation.
 	func previewModule() -> AnyView {
-		return AnyView(PreviewWithFeatureManager(featureManager: <~container) {
+		registerFeatureManager()
+		return AnyView(PreviewFeatureManagerBoostrapper(featureManager: <~container) {
 			builder.root()
 		})
+	}
+}
+
+// MARK: MockFeatureManagerFactory update passthrough methods
+
+public extension Previewer {
+	private func registerFeatureManager() {
+		let manager: FeatureManager
+		if let featureManager {
+			manager = constantFeatureManagerFactory.multiplexed(with: featureManager)
+		} else {
+			manager = constantFeatureManagerFactory.createBootstrappedManager()
+		}
+		container.registerSingleton(manager)
+	}
+
+	/// Sets a feature to a constant state for the preview.
+	///
+	/// This is a chainable passthrough to ``MockFeatureManagerFactory/constant(_:state:)``.
+	///
+	/// - Parameters:
+	///   - featureType: The feature type to configure.
+	///   - state: The constant state to assign to the feature.
+	/// - Returns: `self`, allowing further configuration via chaining.
+	func constant<F: Feature>(_ featureType: F.Type, state: F.State) -> Self {
+		constantFeatureManagerFactory.constant(featureType, state: state)
+		return self
+	}
+
+	/// Sets a boolean feature to enabled or disabled for the preview.
+	///
+	/// This is a chainable passthrough to ``MockFeatureManagerFactory/constant(_:enabled:)``.
+	///
+	/// - Parameters:
+	///   - featureType: The boolean feature type to configure.
+	///   - enabled: Whether the feature should be enabled.
+	/// - Returns: `self`, allowing further configuration via chaining.
+	func constant<F: Feature>(_ featureType: F.Type, enabled: Bool) -> Self where F.State == BooleanState {
+		constantFeatureManagerFactory.constant(featureType, enabled: enabled)
+		return self
 	}
 }
 
@@ -119,34 +211,89 @@ public extension Previewer {
 		)
 	}
 
+	/// Registers a dependency using a factory closure that receives the container.
+	///
+	/// The container must have ``Container/areDependenciesOverridable`` set to
+	/// `true`; otherwise a precondition failure is triggered.
+	///
+	/// - Parameters:
+	///   - type: The type to register.
+	///   - factory: A closure that creates the dependency, receiving the
+	///     container for resolving other dependencies.
+	/// - Returns: `self`, allowing further configuration via chaining.
 	func register<T>(_ type: T.Type, factory: @escaping (Container) -> T) -> Self {
 		checkContainer()
 		container.register(type, factory: factory)
 		return self
 	}
 
+	/// Registers a dependency using an autoclosure factory.
+	///
+	/// The container must have ``Container/areDependenciesOverridable`` set to
+	/// `true`; otherwise a precondition failure is triggered.
+	///
+	/// - Parameters:
+	///   - type: The type to register. Defaults to the inferred type of the factory.
+	///   - factory: An autoclosure that creates the dependency.
+	/// - Returns: `self`, allowing further configuration via chaining.
 	func register<T>(type: T.Type = T.self, _ factory: @autoclosure @escaping () -> T) -> Self {
 		checkContainer()
 		container.register(type: type, factory())
 		return self
 	}
 
+	/// Registers a dependency whose type is inferred from the factory expression.
+	///
+	/// The container must have ``Container/areDependenciesOverridable`` set to
+	/// `true`; otherwise a precondition failure is triggered.
+	///
+	/// - Parameter factory: An autoclosure that creates the dependency.
+	/// - Returns: `self`, allowing further configuration via chaining.
 	func register<T>(_ factory: @autoclosure @escaping () -> T) -> Self {
 		register(type: T.self, factory())
 	}
 
+	/// Registers a singleton dependency using a factory closure that receives the container.
+	///
+	/// The instance is created once and reused for subsequent resolutions.
+	/// The container must have ``Container/areDependenciesOverridable`` set to
+	/// `true`; otherwise a precondition failure is triggered.
+	///
+	/// - Parameters:
+	///   - type: The type to register.
+	///   - factory: A closure that creates the dependency, receiving the
+	///     container for resolving other dependencies.
+	/// - Returns: `self`, allowing further configuration via chaining.
 	func registerSingleton<T>(_ type: T.Type, factory: @escaping (Container) -> T) -> Self {
 		checkContainer()
 		container.registerSingleton(type, factory: factory)
 		return self
 	}
 
+	/// Registers a singleton dependency using an autoclosure factory.
+	///
+	/// The instance is created once and reused for subsequent resolutions.
+	/// The container must have ``Container/areDependenciesOverridable`` set to
+	/// `true`; otherwise a precondition failure is triggered.
+	///
+	/// - Parameters:
+	///   - type: The type to register. Defaults to the inferred type of the factory.
+	///   - factory: An autoclosure that creates the dependency.
+	/// - Returns: `self`, allowing further configuration via chaining.
 	func registerSingleton<T>(type: T.Type = T.self, _ factory: @autoclosure @escaping () -> T) -> Self {
 		checkContainer()
 		container.registerSingleton(type: type, factory())
 		return self
 	}
 
+	/// Registers a singleton dependency whose type is inferred from the factory expression.
+	///
+	/// The instance is created once and reused for subsequent resolutions.
+	/// The container must have ``Container/areDependenciesOverridable`` set to
+	/// `true`; otherwise a precondition failure is triggered.
+	///
+	/// - Parameter factory: An autoclosure that creates the dependency.
+	/// - Returns: `self`, allowing further configuration via chaining.
 	func registerSingleton<T>(_ factory: @autoclosure @escaping () -> T) -> Self {
 		registerSingleton(type: T.self, factory())
 	}
