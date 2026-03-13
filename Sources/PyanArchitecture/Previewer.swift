@@ -139,7 +139,7 @@ public extension Previewer {
 	func preview(
 		modal: Builder.ModalKey,
 		over screen: Builder.ScreenKey? = nil,
-		showButtonAlignment: Alignment? = nil
+		showButtonAlignment: Alignment? = .center
 	) -> AnyView {
 		registerFeatureManager()
 		return AnyView(PreviewFeatureManagerBoostrapper(featureManager: <~container) {

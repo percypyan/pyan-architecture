@@ -27,6 +27,9 @@ struct ShowcaseScreen: @MainActor Screen {
 	var seguesSection: some View {
 		Section {
 			Button("Push", action: presenter.pushAction)
+			SampleBuilder.NavigationLink(to: .showcase(title: "NavLink")) {
+				Text("Push (NavigationLink)")
+			}
 			Button("Full screen cover", action: presenter.fullScreenCoverAction)
 			Button("Sheet", action: presenter.sheetAction)
 			Button("Dismiss", action: presenter.dismissAction)
