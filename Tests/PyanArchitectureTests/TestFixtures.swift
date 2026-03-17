@@ -10,7 +10,7 @@ import SwiftUI
 
 // MARK: - Test Screen & Modal
 
-enum TestScreen: @MainActor BuildableScreen {
+enum TestScreen: BuildableScreen {
 	case home
 	case detail
 	case sheetScreen
@@ -23,14 +23,14 @@ enum TestScreen: @MainActor BuildableScreen {
 	}
 }
 
-enum TestModal: @MainActor BuildableModal {
+enum TestModal: BuildableModal {
 	case confirmation
 }
 
 // MARK: - Test Builder
 
 @MainActor
-struct TestBuilder: @MainActor ModuleBuilder {
+struct TestBuilder: ModuleBuilder {
 	let container: Container
 	let rootScreen: TestScreen = .home
 
@@ -55,7 +55,7 @@ struct TestModalView: Modal {
 // MARK: - Sub Module Builder
 
 @MainActor
-struct SubTestBuilder: @MainActor ModuleBuilder {
+struct SubTestBuilder: ModuleBuilder {
 	let container: Container
 	let rootScreen: TestScreen = .home
 	let onDismiss: () -> Void
