@@ -24,6 +24,14 @@ final class ShowcasePresenter: @MainActor Presenter {
 		return "\(properties.title) #\(sampleGeneratorService.generateInteger())"
 	}
 
+	private(set) var counter: Int
+	private(set) var counterString: String = "Not set"
+
+	private(set) var counter2: Int {
+		didSet { counter2String = "\(counter2)^2 = \(counter2 * counter2)" }
+	}
+	private(set) var counter2String: String = "Not set"
+
 	init(
 		properties: ShowcaseProperties,
 		router: any SampleBuilder.AssociatedRouter,
@@ -32,6 +40,19 @@ final class ShowcasePresenter: @MainActor Presenter {
 		self.properties = properties
 		self.router = router
 		self.sampleGeneratorService = sampleGeneratorService
+		self.counter = 0
+		self.counter2 = 0
+		withObservationTracking {
+			self.counterString = "\(self.counter)^2 = \(self.counter * self.counter)"
+		}
+	}
+
+	func counterIncrementAction() {
+		counter += 1
+	}
+
+	func counter2IncrementAction() {
+		counter2 += 1
 	}
 
 	func pushAction() {

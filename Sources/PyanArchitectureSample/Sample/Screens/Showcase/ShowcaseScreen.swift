@@ -17,6 +17,7 @@ struct ShowcaseScreen: @MainActor Screen {
 
     var screenBody: some View {
 		List {
+			observationSection
 			seguesSection
 			modalSection
 			dismissSection
@@ -24,12 +25,20 @@ struct ShowcaseScreen: @MainActor Screen {
 		.navigationTitle(presenter.title)
     }
 
+	var observationSection: some View {
+		Section {
+			Text(presenter.counterString)
+			Button("Increment (withObservationTracking)", action: presenter.counterIncrementAction)
+			Text(presenter.counter2String)
+			Button("Increment (didSet)", action: presenter.counter2IncrementAction)
+		} header: {
+			Text("Observation")
+		}
+	}
+
 	var seguesSection: some View {
 		Section {
 			Button("Push", action: presenter.pushAction)
-			SampleBuilder.NavigationLink(to: .showcase(title: "NavLink")) {
-				Text("Push (NavigationLink)")
-			}
 			Button("Full screen cover", action: presenter.fullScreenCoverAction)
 			Button("Sheet", action: presenter.sheetAction)
 			Button("Dismiss", action: presenter.dismissAction)

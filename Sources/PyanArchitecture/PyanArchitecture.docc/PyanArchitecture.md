@@ -56,6 +56,10 @@ that maps screen and modal keys to views and resolves services from its
 
 - ``LoggingManager``
 
+### Observation
+
+- ``withObservationTracking(perform:)``
+
 ### Creating a Module
 
 - <doc:CreatingAModule>
