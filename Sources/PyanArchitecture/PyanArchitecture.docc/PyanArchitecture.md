@@ -11,6 +11,9 @@ architecture pattern for building SwiftUI applications:
 - **PyanRouter** -- type-safe, enum-driven navigation via ``RouteBuilder`` and ``Router``.
 - **PyanLogging** -- structured logging with categories and metadata.
 - **PyanFeatureSwitcher** -- runtime feature flags via ``FeatureManager``.
+- **PyanTesting** -- testing utilities and UITests mocks tools.
+
+_See the complete documentation of each of those packages to learn more about what they are offering._
 
 A *module* is a self-contained feature that owns its screens, modals,
 services, and dependencies. Each module is defined by a ``ModuleBuilder``

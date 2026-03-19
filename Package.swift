@@ -27,6 +27,7 @@ let package = Package(
 		.package(url: "https://github.com/percypyan/pyan-router.git", .upToNextMajor(from: "0.1.0")),
 		.package(url: "https://github.com/percypyan/pyan-logging.git", .upToNextMajor(from: "0.2.0")),
 		.package(url: "https://github.com/percypyan/pyan-feature-switcher.git", .upToNextMajor(from: "0.2.0")),
+		.package(url: "https://github.com/percypyan/pyan-testing.git", .upToNextMajor(from: "0.1.0")),
 	],
     targets: [
         .target(
@@ -36,6 +37,7 @@ let package = Package(
 				.product(name: "PyanRouter", package: "pyan-router"),
 				.product(name: "PyanLogging", package: "pyan-logging"),
 				.product(name: "PyanFeatureSwitcher", package: "pyan-feature-switcher"),
+				.product(name: "PyanTesting", package: "pyan-testing"),
 			]
         ),
         .testTarget(

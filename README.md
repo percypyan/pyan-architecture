@@ -8,10 +8,11 @@ PyanArchitecture ties together four companion libraries into a cohesive architec
 
 | Library | Role |
 |---|---|
-| [PyanInject](https://github.com/percypyan/PyanInject) | Dependency injection |
-| [PyanRouter](https://github.com/percypyan/PyanRouter) | Type-safe navigation |
-| [PyanLogging](https://github.com/percypyan/PyanLogging) | Structured logging |
-| [PyanFeatureSwitcher](https://github.com/percypyan/PyanFeatureSwitcher) | Runtime feature flags |
+| [PyanInject](https://github.com/percypyan/pyan-inject) | Dependency injection |
+| [PyanRouter](https://github.com/percypyan/pyan-router) | Type-safe navigation |
+| [PyanLogging](https://github.com/percypyan/pyan-logging) | Structured logging |
+| [PyanFeatureSwitcher](https://github.com/percypyan/pyan-feature-switcher) | Runtime feature flags |
+| [PyanTesting](https://github.com/percypyan/pyan-testing) | Testing utilities |
 
 ## Requirements
 
