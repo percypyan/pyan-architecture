@@ -45,8 +45,9 @@ import SwiftUI
 /// ```
 @MainActor
 public struct Previewer<Builder: ModuleBuilder> {
+	public let container: Container
+
 	private let builder: Builder
-	private let container: Container
 	private let featureManager: FeatureManager?
 	private let constantFeatureManagerFactory: ConstantFeatureManagerFactory
 
