@@ -13,5 +13,5 @@
 @_exported import PyanLogging
 /// Re-exports PyanFeatureSwitcher so consumers only need to `import PyanArchitecture`.
 @_exported import PyanFeatureSwitcher
-/// Re-exports PyanTesting so consumers only need to `import PyanArchitecture`.
-@_exported import PyanTesting
+/// Re-exports PyanMocking so consumers only need to `import PyanArchitecture`.
+@_exported import PyanMocking
