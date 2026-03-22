@@ -40,6 +40,11 @@ public protocol Presenter: AnyObject, Observable {
 	/// The router used to trigger navigation from this presenter.
 	var router: any Builder.AssociatedRouter { get }
 
+	/// Storage used internally by ``MonitorChange(of:initial:perform:)`` to track previous values.
+	///
+	/// Synthesized automatically by `@Presenter`. Do not modify directly.
+	var _changeMonitoringRegistry: [String: any Equatable] { get set }
+
 	/// Called when the screen appears. The default implementation does nothing.
 	func onAppear()
 
