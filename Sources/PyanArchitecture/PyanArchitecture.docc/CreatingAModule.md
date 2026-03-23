@@ -84,8 +84,53 @@ Each screen has a ``Presenter``. Presenters are `@Observable` classes that:
 2. Resolve and interact with services.
 3. Expose state properties that the ``Screen`` view observes.
 
+Apply the ``Presenter()`` macro to your class instead of conforming to
+``Presenter`` manually. The macro adds the protocol conformance allow usage
+of ``MonitorChange(of:initial:perform:)``.
+
+```swift
+@MainActor
+@Observable
+@Presenter
+final class HomePresenter {
+    let router: any MyBuilder.AssociatedRouter
+    let service: ProfileService
+
+    init(router: any MyBuilder.AssociatedRouter, service: ProfileService) {
+        self.router = router
+        self.service = service
+    }
+}
+```
+
 Override ``Presenter/onAppear()`` or ``Presenter/onDisappear()`` to react
 to lifecycle events.
+
+### Reacting to Observable Changes
+
+Use ``MonitorChange(of:initial:perform:)`` to observe an `@Observable`
+property and run a closure each time its value changes. This is
+particularly useful inside `onAppear()` or `init()` to keep presenter state
+in sync with a service:
+
+```swift
+func onAppear() {
+    #MonitorChange(of: service.profile, initial: true) { previous, current in
+        self.username = current?.name ?? ""
+    }
+}
+```
+
+- **`initial: true`** -- fires the closure immediately with `nil` as the
+  previous value and the current value of the expression.
+- **`initial: false`** (default) -- stores the current value on first call
+  and only fires the closure on subsequent changes.
+
+The macro deduplicates registrations based on source location, so calling
+it multiple times from the same call site (e.g. repeated `onAppear()`
+invocations) is a safe no-op.
+
+> important: The enclosing class must be annotated with `@Presenter`.
 
 ### The Screen View
 

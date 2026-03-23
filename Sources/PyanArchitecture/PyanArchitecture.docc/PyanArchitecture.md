@@ -31,6 +31,14 @@ that maps screen and modal keys to views and resolves services from its
 - **``Previewer``** -- simplifies Xcode Previews by letting you preview
   individual screens, modals, or a full module with mock dependencies.
 
+### Macros
+
+- **``Presenter()``** -- an attached macro that adds ``Presenter`` protocol
+  conformance.
+- **``MonitorChange(of:initial:perform:)``** -- a freestanding expression
+  macro that observes an `@Observable` property and invokes a closure when
+  its value changes.
+
 ### Utilities
 
 - **``SubModuleView``** -- embeds a child module inside a parent module's
@@ -46,6 +54,11 @@ that maps screen and modal keys to views and resolves services from its
 - ``ModuleBuilder``
 - ``Presenter``
 - ``Screen``
+
+### Macros
+
+- ``Presenter()``
+- ``MonitorChange(of:initial:perform:)``
 
 ### Previewing
 

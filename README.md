@@ -83,7 +83,8 @@ struct MyBuilder: ModuleBuilder {
 ```swift
 @MainActor
 @Observable
-final class HomePresenter: Presenter {
+@Presenter
+final class HomePresenter {
     let router: any MyBuilder.AssociatedRouter
     let service: ProfileService
 
@@ -98,7 +99,21 @@ final class HomePresenter: Presenter {
 }
 ```
 
-**5. Build a Screen**
+The `@Presenter` macro adds `Presenter` protocol conformance and allow usage of `#MonitorChange`.
+
+**5. React to Observable Changes**
+
+```swift
+func onAppear() {
+    #MonitorChange(of: service.profile, initial: true) { previous, current in
+        self.username = current?.name ?? ""
+    }
+}
+```
+
+`#MonitorChange` observes an `@Observable` property and calls the closure each time its value changes. Set `initial: true` to fire immediately, or omit it (defaults to `false`) to wait for the first change. Repeated calls from the same site are deduplicated automatically, making it safe to use in `Presenter.onAppear` method for example.
+
+**6. Build a Screen**
 
 ```swift
 struct HomeScreen: Screen {
@@ -110,7 +125,7 @@ struct HomeScreen: Screen {
 }
 ```
 
-**6. Display the module**
+**7. Display the module**
 
 ```swift
 MyBuilder(container: container).root()

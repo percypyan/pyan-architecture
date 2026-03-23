@@ -90,12 +90,15 @@ struct MyBuilder: ModuleBuilder {
 ### Step 4 -- Build a Presenter
 
 A ``Presenter`` is an `@Observable` class that owns the router and exposes
-state to the view:
+state to the view. Apply the ``Presenter()`` macro to automatically conform
+to the ``Presenter`` protocol. The ``MonitorChange(of:initial:perform:)`` 
+can be used in class annotated with `@Presenter`:
 
 ```swift
 @MainActor
 @Observable
-final class HomePresenter: Presenter {
+@Presenter
+final class HomePresenter {
     let router: any MyBuilder.AssociatedRouter
     let service: ProfileService
 
@@ -110,7 +113,29 @@ final class HomePresenter: Presenter {
 }
 ```
 
-### Step 5 -- Build a Screen
+> tip: Do not conform to ``Presenter`` manually, always use the `@Presenter`
+macro.
+
+### Step 5 -- React to Observable Changes
+
+Use ``MonitorChange(of:initial:perform:)`` inside a presenter method to
+observe an `@Observable` property and run a closure whenever its value
+changes:
+
+```swift
+func onAppear() {
+    #MonitorChange(of: service.profile, initial: true) { previous, current in
+        self.username = current?.name ?? ""
+    }
+}
+```
+
+The macro automatically deduplicates registrations -- calling it multiple
+times from the same call site is a no-op. Set `initial: true` to fire
+the closure immediately with the current value, or `initial: false`
+(the default) to wait for the first change.
+
+### Step 6 -- Build a Screen
 
 A ``Screen`` pairs a view with its presenter. Implement ``Screen/screenBody``
 instead of `body` -- lifecycle callbacks are wired automatically:
@@ -125,7 +150,7 @@ struct HomeScreen: Screen {
 }
 ```
 
-### Step 6 -- Display the Module
+### Step 7 -- Display the Module
 
 Call ``RouteBuilder/root()`` on the builder to obtain the root view:
 
