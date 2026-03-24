@@ -20,6 +20,7 @@ PyanArchitecture ties together four companion libraries into a cohesive architec
 
 - iOS 18.0+
 - macOS 15.0+
+- macCatalyst 18.0+
 - tvOS 18.0+
 - watchOS 11.0+
 - visionOS 2.0+
