@@ -5,7 +5,7 @@ import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "PyanArchitecture",
+    name: "pyan-architecture",
 	platforms: [
 		.iOS(.v18),
 		.macOS(.v15),
