@@ -1,6 +1,6 @@
 //
 //  FeatureSwitcher+LoggerAttachable.swift
-//  PyanArchitecture
+//  pyan-architecture
 //
 //  Created by Perceval Archimbaud on 06/03/2026.
 //

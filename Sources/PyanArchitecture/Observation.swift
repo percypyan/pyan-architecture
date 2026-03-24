@@ -1,6 +1,6 @@
 //
 //  Observer.swift
-//  PyanArchitecture
+//  pyan-architecture
 //
 //  Created by Perceval Archimbaud on 17/03/2026.
 //

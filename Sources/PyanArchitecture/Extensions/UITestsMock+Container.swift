@@ -1,6 +1,6 @@
 //
 //  UITestsMock+Container.swift
-//  PyanArchitecture
+//  pyan-architecture
 //
 //  Created by Perceval Archimbaud on 19/03/2026.
 //

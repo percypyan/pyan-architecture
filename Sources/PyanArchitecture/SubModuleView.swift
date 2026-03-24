@@ -1,6 +1,6 @@
 //
 //  SubModuleView.swift
-//  PyanArchitecture
+//  pyan-architecture
 //
 //  Created by Perceval Archimbaud on 03/03/2026.
 //

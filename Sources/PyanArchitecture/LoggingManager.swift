@@ -1,6 +1,6 @@
 //
 //  LoggingManager.swift
-//  PyanArchitecture
+//  pyan-architecture
 //
 //  Created by Perceval Archimbaud on 02/03/2026.
 //

@@ -1,6 +1,6 @@
 //
 //  Screen.swift
-//  PyanArchitecture
+//  pyan-architecture
 //
 //  Created by Perceval Archimbaud on 24/02/2026.
 //

@@ -1,6 +1,6 @@
 //
-//  PyanArchitecture.swift
-//  PyanArchitecture
+//  pyan-architecture.swift
+//  pyan-architecture
 //
 //  Created by Perceval Archimbaud on 05/02/2026.
 //

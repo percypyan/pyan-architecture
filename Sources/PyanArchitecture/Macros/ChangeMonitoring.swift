@@ -1,6 +1,6 @@
 //
 //  ChangeMonitoring.swift
-//  PyanArchitecture
+//  pyan-architecture
 //
 //  Created by Perceval Archimbaud on 22/03/2026.
 //
