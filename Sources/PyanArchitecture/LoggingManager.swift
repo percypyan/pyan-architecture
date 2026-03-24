@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Synchronization
 
 /// Manages the logging system bootstrap and provides categorized loggers.
 ///
@@ -26,12 +27,12 @@ import Foundation
 ///
 /// let logger = logging.logger(for: .network)
 /// ```
-public final class LoggingManager<Category: LogCategory, AppMetadataKey: MetadataKey> {
+public final class LoggingManager<Category: LogCategory, AppMetadataKey: MetadataKey>: Sendable {
 	/// A convenience alias for the metadata container parameterized with the app's metadata key type.
 	public typealias MetadataContainer = PyanLogging.MetadataContainer<AppMetadataKey>
 
-	private var isBootstrapped: Bool = false
-	private var isAutoBootstrapped: Bool = false
+	private let isBootstrapped = Mutex<Bool>(false)
+	private let isAutoBootstrapped = Mutex<Bool>(false)
 	private let factory: LoggerFactory<Category>
 
 	/// The metadata container used to attach global metadata to every log message.
@@ -56,8 +57,8 @@ public final class LoggingManager<Category: LogCategory, AppMetadataKey: Metadat
 	///
 	///  > important: This initializer is only available in **Debug** builds.
 	public init(withMockStorage storage: MockLogHandler.Storage) {
-		self.isBootstrapped = true
-		self.isAutoBootstrapped = true
+		self.isBootstrapped.withLock { $0 = true }
+		self.isAutoBootstrapped.withLock { $0 = true }
 		self.factory = .init(label: Self.label) { label, provider in
 			MockLogHandler(label: label, category: "Uncategorized", storage: storage)
 		}
@@ -69,8 +70,13 @@ public final class LoggingManager<Category: LogCategory, AppMetadataKey: Metadat
 	/// - Parameter category: The log category to use.
 	/// - Returns: A configured `Logger` instance.
 	public func logger(for category: Category) -> Logger {
-		if !isBootstrapped {
-			defaultBootstrap()
+		isBootstrapped.withLock { isBootstrapped in
+			if !isBootstrapped {
+				isAutoBootstrapped.withLock { isAutoBootstrapped in
+					defaultBootstrap()
+					isAutoBootstrapped = true
+				}
+			}
 		}
 
 		return factory.logger(for: category)
@@ -101,20 +107,33 @@ public final class LoggingManager<Category: LogCategory, AppMetadataKey: Metadat
 		_ factory: @Sendable @escaping (String, Logger.MetadataProvider?) -> any LogHandler,
 		metadataProvider: Logger.MetadataProvider?
 	) -> Self {
-		guard !isBootstrapped else {
-			let logger = Logger(label: Self.label)
-			if isAutoBootstrapped {
-				assertionFailure("`logger(for:)` has already been called, triggering an automatic bootstrap. Ignoring.")
-				logger.error("`logger(for:)` has already been called, triggering an automatic bootstrap. Ignoring.")
-			} else {
-				assertionFailure("LoggingSystem has already been bootstrapped. Ignoring.")
-				logger.error("LoggingSystem has already been bootstrapped. Ignoring.")
+		isBootstrapped.withLock { isBootstrapped in
+			guard !isBootstrapped else {
+				let logger = Logger(label: Self.label)
+				isAutoBootstrapped.withLock { isAutoBootstrapped in
+					if isAutoBootstrapped {
+						assertionFailure("`logger(for:)` has already been called, triggering an automatic bootstrap. Ignoring.")
+						logger.error("`logger(for:)` has already been called, triggering an automatic bootstrap. Ignoring.")
+					} else {
+						assertionFailure("LoggingSystem has already been bootstrapped. Ignoring.")
+						logger.error("LoggingSystem has already been bootstrapped. Ignoring.")
+					}
+				}
+				return
 			}
-			return self
+
+			_boostrap(factory, metadataProvider: metadataProvider)
+
+			isBootstrapped = true
 		}
 
-		isBootstrapped = true
+		return self
+	}
 
+	private func _boostrap(
+		_ factory: @Sendable @escaping (String, Logger.MetadataProvider?) -> any LogHandler,
+		metadataProvider: Logger.MetadataProvider?
+	) {
 		let provider: Logger.MetadataProvider?
 		if let metadataProvider {
 			provider = .multiplex([
@@ -126,16 +145,12 @@ public final class LoggingManager<Category: LogCategory, AppMetadataKey: Metadat
 		}
 
 		LoggingSystem.bootstrap(factory, metadataProvider: provider)
-
-		return self
 	}
 }
 
 extension LoggingManager {
 	private func defaultBootstrap() {
-		isAutoBootstrapped = true
-
-		boostrap({ label, provider in
+		_boostrap({ label, provider in
 			OSLogHandler(label: label, category: "Uncategorized", metadataProvider: provider)
 		}, metadataProvider: nil)
 	}
