@@ -59,3 +59,23 @@ public macro MonitorChange<Value: Equatable>(
 	initial: Bool = false,
 	perform: (Value?, Value) -> Void
 ) -> Void = #externalMacro(module: "PyanArchitectureMacros", type: "MonitorChangeMacro")
+
+/// Returns a value conditionally based on a compilation flag.
+///
+/// Use `#value` to provide different values depending on a compiler condition
+/// (such as `DEBUG`, `MOCK`, etc.) without cluttering call sites with `#if` blocks.
+///
+/// - Parameters:
+///   - releaseValue: The value used when the flag is **not** defined.
+///   - withAlternative: The value used when the flag **is** defined.
+///   - for: The compilation flag to check as a string literal (e.g., `"DEBUG"`, `"MOCK"`).
+///
+/// ```swift
+/// let endpoint = #value("https://api.prod.com", withAlternative: "https://api.staging.com", for: "DEBUG")
+/// ```
+@freestanding(expression)
+public macro value<T>(
+	_ releaseValue: T,
+	withAlternative altValue: T,
+	for flag: StaticString
+) -> T = #externalMacro(module: "PyanArchitectureMacros", type: "ValueMacro")

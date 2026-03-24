@@ -15,6 +15,7 @@ import Testing
 let testMacros: [String: Macro.Type] = [
 	"Presenter": PresenterMacro.self,
 	"MonitorChange": MonitorChangeMacro.self,
+	"value": ValueMacro.self,
 ]
 
 // MARK: - @Presenter Tests
@@ -203,6 +204,149 @@ struct MonitorChangeMacroTests {
 					message: "#MonitorChange requires a trailing closure",
 					line: 1,
 					column: 1
+				)
+			],
+			macros: testMacros
+		)
+	}
+}
+
+// MARK: - #value Tests
+
+@Suite("#value Macro")
+struct ValueMacroTests {
+
+	@Test("expands with DEBUG flag and integer values")
+	func debugFlagIntegers() {
+		assertMacroExpansion(
+			"""
+			let number = #value(10, withAlternative: 100, for: "DEBUG")
+			""",
+			expandedSource: """
+			let number = {
+				#if DEBUG
+					return 100
+				#else
+					return 10
+				#endif
+			}()
+			""",
+			macros: testMacros
+		)
+	}
+
+	@Test("expands with DEBUG flag and floating point values")
+	func debugFlagFloats() {
+		assertMacroExpansion(
+			"""
+			let number = #value(10.25, withAlternative: 100, for: "DEBUG")
+			""",
+			expandedSource: """
+			let number = {
+				#if DEBUG
+					return 100
+				#else
+					return 10.25
+				#endif
+			}()
+			""",
+			macros: testMacros
+		)
+	}
+
+	@Test("expands with MOCK flag and string values")
+	func mockFlagStrings() {
+		assertMacroExpansion(
+			"""
+			let str = #value("str", withAlternative: "it's mock!", for: "MOCK")
+			""",
+			expandedSource: """
+			let str = {
+				#if MOCK
+					return "it's mock!"
+				#else
+					return "str"
+				#endif
+			}()
+			""",
+			macros: testMacros
+		)
+	}
+
+	@Test("emits error when release value is missing")
+	func missingReleaseValue() {
+		assertMacroExpansion(
+			"""
+			#value(withAlternative: 100, for: "DEBUG")
+			""",
+			expandedSource: """
+			() as Never
+			""",
+			diagnostics: [
+				DiagnosticSpec(
+					message: "#value requires a release value as the first argument",
+					line: 1,
+					column: 1
+				)
+			],
+			macros: testMacros
+		)
+	}
+
+	@Test("emits error when withAlternative is missing")
+	func missingAlternative() {
+		assertMacroExpansion(
+			"""
+			#value(10, for: "DEBUG")
+			""",
+			expandedSource: """
+			() as Never
+			""",
+			diagnostics: [
+				DiagnosticSpec(
+					message: "#value requires a 'withAlternative:' argument",
+					line: 1,
+					column: 1
+				)
+			],
+			macros: testMacros
+		)
+	}
+
+	@Test("emits error when for flag is missing")
+	func missingFlag() {
+		assertMacroExpansion(
+			"""
+			#value(10, withAlternative: 100)
+			""",
+			expandedSource: """
+			() as Never
+			""",
+			diagnostics: [
+				DiagnosticSpec(
+					message: "#value requires a 'for:' argument specifying a compilation flag",
+					line: 1,
+					column: 1
+				)
+			],
+			macros: testMacros
+		)
+	}
+
+	@Test("emits error when for flag is not a string literal")
+	func flagNotStringLiteral() {
+		assertMacroExpansion(
+			"""
+			#value(10, withAlternative: 100, for: someVariable)
+			""",
+			expandedSource: """
+			() as Never
+			""",
+			diagnostics: [
+				DiagnosticSpec(
+					message: "'for' must be a string literal (e.g., \"DEBUG\")",
+					line: 1,
+					column: 38
 				)
 			],
 			macros: testMacros

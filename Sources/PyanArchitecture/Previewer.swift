@@ -222,7 +222,7 @@ public extension Previewer {
 	///   - factory: A closure that creates the dependency, receiving the
 	///     container for resolving other dependencies.
 	/// - Returns: `self`, allowing further configuration via chaining.
-	func register<T>(_ type: T.Type, factory: @escaping (Container) -> T) -> Self {
+	func register<T>(_ type: T.Type, factory: @escaping (Resolver) -> T) -> Self {
 		checkContainer()
 		container.register(type, factory: factory)
 		return self
@@ -265,7 +265,7 @@ public extension Previewer {
 	///   - factory: A closure that creates the dependency, receiving the
 	///     container for resolving other dependencies.
 	/// - Returns: `self`, allowing further configuration via chaining.
-	func registerSingleton<T>(_ type: T.Type, factory: @escaping (Container) -> T) -> Self {
+	func registerSingleton<T>(_ type: T.Type, factory: @escaping (Resolver) -> T) -> Self {
 		checkContainer()
 		container.registerSingleton(type, factory: factory)
 		return self

@@ -15,6 +15,7 @@ struct PyanArchitecturePlugin: CompilerPlugin {
 	let providingMacros: [Macro.Type] = [
 		PresenterMacro.self,
 		MonitorChangeMacro.self,
+		ValueMacro.self,
 	]
 }
 

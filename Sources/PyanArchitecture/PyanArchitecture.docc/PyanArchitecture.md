@@ -38,6 +38,9 @@ that maps screen and modal keys to views and resolves services from its
 - **``MonitorChange(of:initial:perform:)``** -- a freestanding expression
   macro that observes an `@Observable` property and invokes a closure when
   its value changes.
+- **``value(_:withAlternative:for:)``** -- a freestanding expression
+  macro to provide an alternative value when a specific compilation flag
+  is defined.
 
 ### Utilities
 

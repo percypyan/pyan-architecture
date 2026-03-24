@@ -19,7 +19,7 @@ public struct MonitorChangeMacro: ExpressionMacro {
 		let arguments = node.arguments
 
 		// Extract `of:` argument
-		guard let ofArg = arguments.first(where: { $0.label?.text == "of" }) else {
+		guard let ofArg = arguments.first, ofArg.label?.text == "of" else {
 			context.diagnose(Diagnostic(
 				node: Syntax(node),
 				message: MonitorChangeDiagnostic.missingOfArgument
