@@ -53,6 +53,8 @@ public protocol Presenter: AnyObject, Observable {
 }
 
 public extension Presenter {
+	var _changeMonitoringRegistry: [String: any Equatable] { get { [:] } set {} }
+
 	func onAppear() {}
 	func onDisappear() {}
 }

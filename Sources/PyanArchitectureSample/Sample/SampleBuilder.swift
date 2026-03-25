@@ -11,11 +11,19 @@ import PyanArchitecture
 @MainActor
 struct SampleBuilder: @MainActor ModuleBuilder {
 	let container: Container
-	let rootScreen: SampleScreen
+
+	private var rootTitle: String
 
 	init(container: Container, rootProperties: ShowcaseProperties) {
 		self.container = container
-		self.rootScreen = .showcase(title: rootProperties.title)
+		self.rootTitle = rootProperties.title
+	}
+
+	var root: some View {
+		ModuleTabs(builder: self, tabs: [
+			ModuleTab(screen: .showcase(title: rootTitle), title: "Showcase", systemImage: "star.fill"),
+			ModuleTab(screen: .showcase(title: "Secondary"), title: "Secondary", systemImage: "scribble.variable"),
+		])
 	}
 
 	func build(screen: SampleScreen, with router: any AssociatedRouter) -> any View {

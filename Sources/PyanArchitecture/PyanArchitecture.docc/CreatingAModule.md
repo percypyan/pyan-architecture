@@ -26,7 +26,7 @@ MyModule/
 │       └── AlertModal.swift       // Modal view
 ├── Services/
 │   └── ProfileService/
-│       ├── ProfileService.swift          // Protocol
+│       ├── ProfileService.swift   // Protocol
 │       ├── ProductionProfileService.swift
 │       └── MockProfileService.swift
 ├── MyBuilder.swift                // ModuleBuilder
@@ -35,6 +35,8 @@ MyModule/
 
 ### Defining Services
 
+Services can live outside Modules, but sometimes they are specific to
+a Module an therefore should be placed in the `Module/Services` directory.
 Define a protocol for each service. Provide a production implementation
 and a mock for previews and tests:
 
@@ -64,7 +66,10 @@ The ``ModuleBuilder`` is the single entry point for a module. It owns the
 ```swift
 struct MyBuilder: ModuleBuilder {
     let container: Container
-    let rootScreen: MyScreen = .home
+
+    var root: MyScreen {
+		root(for: .home)
+	}
 
     func build(screen: MyScreen, with router: any AssociatedRouter) -> any View {
         // resolve services with <~container
@@ -103,6 +108,9 @@ final class HomePresenter {
 }
 ```
 
+> Note: If you use default @MainActor isolation (as recommended), `@MainActor`
+decorator can be omitted.
+
 Override ``Presenter/onAppear()`` or ``Presenter/onDisappear()`` to react
 to lifecycle events.
 
@@ -137,19 +145,6 @@ invocations) is a safe no-op.
 A ``Screen`` defines its UI in ``Screen/screenBody`` and stores its
 presenter as a `@State` property. The default `body` implementation
 automatically calls `onAppear` and `onDisappear` on the presenter.
-
-### Embedding Sub-Modules
-
-Use ``SubModuleView`` (or the ``ModuleBuilder/SubModuleView`` alias) to
-embed a child module. The child receives a dismiss callback so it can
-return to the parent's navigation:
-
-```swift
-case .child:
-    SubModuleView(router: router) { dismiss in
-        ChildBuilder(container: container, onDismiss: dismiss)
-    }
-```
 
 ### Setting Up Previews
 

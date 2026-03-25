@@ -27,9 +27,6 @@
 /// ```
 @MainActor
 public protocol ModuleBuilder: RouteBuilder {
-	/// A convenience alias that lets you embed a child module inside this module's navigation.
-	typealias SubModuleView<SubBuilder: ModuleBuilder> = PyanArchitecture.SubModuleView<Self, SubBuilder>
-
 	/// The dependency injection container for this module.
 	var container: Container { get }
 }

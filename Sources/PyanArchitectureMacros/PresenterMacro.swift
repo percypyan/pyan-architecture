@@ -54,7 +54,7 @@ extension PresenterMacro: ExtensionMacro {
 		if protocols.contains(where: { $0.trimmedDescription == "Presenter" }) {
 			let ext: DeclSyntax =
 				"""
-				extension \(type.trimmed): Presenter {}
+				extension \(type.trimmed): @MainActor Presenter {}
 				"""
 			if let extensionDecl = ext.as(ExtensionDeclSyntax.self) {
 				extensions.append(extensionDecl)

@@ -44,8 +44,6 @@ that maps screen and modal keys to views and resolves services from its
 
 ### Utilities
 
-- **``SubModuleView``** -- embeds a child module inside a parent module's
-  navigation, automatically wiring dismiss callbacks.
 - **``LoggingManager``** -- manages the logging system bootstrap and
   provides categorized loggers with shared metadata.
 
@@ -69,7 +67,7 @@ that maps screen and modal keys to views and resolves services from its
 
 ### Module Composition
 
-- ``SubModuleView``
+- <doc:ModuleComposition>
 
 ### Logging
 

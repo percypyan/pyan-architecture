@@ -56,7 +56,7 @@ public struct Previewer<Builder: ModuleBuilder> {
 	/// - Parameters:
 	///   - container: The dependency injection container the module uses. Must to be overridable.
 	///   - builder: The module builder that knows how to create screens and modals.
-	///   - featureManager: A feature manager to override (through multiplexing).
+	///   - manager: A feature manager to override (through multiplexing).
 	public init(
 		container: Container,
 		builder: Builder,
@@ -157,7 +157,7 @@ public extension Previewer {
 	func previewModule() -> AnyView {
 		registerFeatureManager()
 		return AnyView(PreviewFeatureManagerBoostrapper(featureManager: <~container) {
-			builder.root()
+			builder
 		})
 	}
 }

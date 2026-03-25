@@ -42,7 +42,7 @@ struct PresenterMacroTests {
 				var _changeMonitoringRegistry: [String: any Equatable] = [:]
 			}
 
-			extension MyPresenter: Presenter {
+			extension MyPresenter: @MainActor Presenter {
 			}
 			""",
 			macros: testMacros
@@ -85,7 +85,7 @@ struct PresenterMacroTests {
 				var _changeMonitoringRegistry: [String: any Equatable] = [:]
 			}
 
-			extension MyPresenter: Presenter {
+			extension MyPresenter: @MainActor Presenter {
 			}
 			""",
 			macros: testMacros

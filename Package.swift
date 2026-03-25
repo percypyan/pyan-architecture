@@ -26,7 +26,7 @@ let package = Package(
     ],
 	dependencies: [
 		.package(url: "https://github.com/percypyan/pyan-inject.git", .upToNextMajor(from: "0.2.0")),
-		.package(url: "https://github.com/percypyan/pyan-router.git", .upToNextMajor(from: "0.2.0")),
+		.package(url: "https://github.com/percypyan/pyan-router.git", .upToNextMajor(from: "0.3.0")),
 		.package(url: "https://github.com/percypyan/pyan-logging.git", .upToNextMajor(from: "0.2.1")),
 		.package(url: "https://github.com/percypyan/pyan-feature-switcher.git", .upToNextMajor(from: "0.2.0")),
 		.package(url: "https://github.com/percypyan/pyan-testing.git", .upToNextMajor(from: "0.1.1")),

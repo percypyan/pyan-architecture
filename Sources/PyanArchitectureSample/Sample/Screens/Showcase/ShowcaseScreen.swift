@@ -27,10 +27,34 @@ struct ShowcaseScreen: @MainActor Screen {
 
 	var observationSection: some View {
 		Section {
-			Text(presenter.counterString)
-			Button("Increment (withObservationTracking)", action: presenter.counterIncrementAction)
-			Text(presenter.counter2String)
-			Button("Increment (didSet)", action: presenter.counter2IncrementAction)
+			observationCell(
+				value: presenter.macroInitialFalseStr,
+				label: "#MonitorChange(initial: false)"
+			)
+			observationCell(
+				value: presenter.macroInitialTrueStr,
+				label: "#MonitorChange(initial: true)"
+			)
+			observationCell(
+				value: presenter.withObservationStr,
+				label: "withObservationTracking"
+			)
+			observationCell(
+				value: presenter.didSetStr,
+				label: "didSet"
+			)
+			Button(action: presenter.incrementAction) {
+				HStack {
+					Image(systemName: "plus.square.fill")
+					Text("Increment")
+				}
+			}
+			Button(role: .destructive, action: presenter.resetAction) {
+				HStack {
+					Image(systemName: "eraser.fill")
+					Text("Reset")
+				}
+			}
 		} header: {
 			Text("Observation")
 		}
@@ -66,6 +90,14 @@ struct ShowcaseScreen: @MainActor Screen {
 				.tint(.red)
 		} header: {
 			Text("Dismisses")
+		}
+	}
+
+	private func observationCell(value: String, label: String) -> some View {
+		HStack {
+			Text(label).bold()
+			Spacer(minLength: 0)
+			Text(value)
 		}
 	}
 }

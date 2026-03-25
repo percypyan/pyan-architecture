@@ -32,7 +32,10 @@ enum TestModal: BuildableModal {
 @MainActor
 struct TestBuilder: ModuleBuilder {
 	let container: Container
-	let rootScreen: TestScreen = .home
+
+	var root: some View {
+		root(for: .home)
+	}
 
 	func build(screen: TestScreen, with router: any AssociatedRouter) -> any View {
 		Text(verbatim: "Screen: \(screen)")
@@ -57,8 +60,11 @@ struct TestModalView: Modal {
 @MainActor
 struct SubTestBuilder: ModuleBuilder {
 	let container: Container
-	let rootScreen: TestScreen = .home
 	let onDismiss: () -> Void
+
+	var root: some View {
+		root(for: .home)
+	}
 
 	func build(screen: TestScreen, with router: any AssociatedRouter) -> any View {
 		Text("SubModule")
