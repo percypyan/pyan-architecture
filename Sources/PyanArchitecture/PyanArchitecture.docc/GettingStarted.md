@@ -152,7 +152,7 @@ struct HomeScreen: Screen {
 
 ### Step 7 -- Display the Module
 
-Call ``RouteBuilder/root()`` on the builder to obtain the root view:
+``RouteBuilder`` is a `View` you can insert in any SwiftUI View hierarchy:
 
 ```swift
 @main

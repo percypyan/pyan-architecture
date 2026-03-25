@@ -177,7 +177,7 @@ public extension Previewer {
 
 	/// Sets a feature to a constant state for the preview.
 	///
-	/// This is a chainable passthrough to ``MockFeatureManagerFactory/constant(_:state:)``.
+	/// This is a chainable passthrough to `ConstantFeatureManagerFactory/constant(_:state:)`.
 	///
 	/// - Parameters:
 	///   - featureType: The feature type to configure.
@@ -190,7 +190,7 @@ public extension Previewer {
 
 	/// Sets a boolean feature to enabled or disabled for the preview.
 	///
-	/// This is a chainable passthrough to ``MockFeatureManagerFactory/constant(_:enabled:)``.
+	/// This is a chainable passthrough to `ConstantFeatureManagerFactory/constant(_:enabled:)`.
 	///
 	/// - Parameters:
 	///   - featureType: The boolean feature type to configure.
