@@ -91,7 +91,6 @@ struct PreviewFeatureManagerBoostrapper<Content: View>: View {
 	let content: () -> Content
 
 	var body: some View {
-		let featureManager = featureManager
 		Group {
 			if featureManager.isReady {
 				content()
