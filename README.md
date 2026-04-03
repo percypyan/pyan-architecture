@@ -35,7 +35,7 @@ Add PyanArchitecture as a local package dependency in Xcode, or reference it in 
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/percypyan/PyanArchitecture.git", .upToNextMajor("0.1.0"))
+    .package(url: "https://github.com/percypyan/PyanArchitecture.git", .upToNextMajor("0.2.0"))
 ]
 ```
 
