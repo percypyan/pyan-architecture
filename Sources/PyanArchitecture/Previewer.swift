@@ -60,10 +60,14 @@ public struct Previewer<Builder: ModuleBuilder> {
 		builder: Builder,
 		featureManager manager: FeatureManager
 	) {
+		#if DEBUG
 		self.container = container
 		self.builder = builder
 		self.featureManager = manager
 		self.constantFeatureManagerFactory = ConstantFeatureManagerFactory(isOverridable: true)
+		#else
+		preconditionFailure("Should only be used in DEBUG builds.")
+		#endif
 	}
 
 	/// Creates a new previewer.
@@ -75,10 +79,14 @@ public struct Previewer<Builder: ModuleBuilder> {
 		container: Container,
 		builder: Builder
 	) {
+		#if DEBUG
 		self.container = container
 		self.builder = builder
 		self.featureManager = nil
 		self.constantFeatureManagerFactory = ConstantFeatureManagerFactory(isOverridable: true)
+		#else
+		preconditionFailure("Should only be used in DEBUG builds.")
+		#endif
 	}
 }
 
@@ -116,10 +124,14 @@ public extension Previewer {
 	/// - Parameter screen: The screen key identifying which screen to preview.
 	/// - Returns: A type-erased view of the requested screen.
 	func preview(screen: Builder.ScreenKey) -> AnyView {
+		#if DEBUG
 		registerFeatureManager()
 		return AnyView(PreviewFeatureManagerBoostrapper(featureManager: <~container) {
 			builder.previewScreen(screen)
 		})
+		#else
+		preconditionFailure("Should only be used in DEBUG builds.")
+		#endif
 	}
 
 	/// Returns a view that previews a modal, optionally displayed over a screen.
@@ -139,10 +151,14 @@ public extension Previewer {
 		over screen: Builder.ScreenKey? = nil,
 		showButtonAlignment: Alignment? = .center
 	) -> AnyView {
+		#if DEBUG
 		registerFeatureManager()
 		return AnyView(PreviewFeatureManagerBoostrapper(featureManager: <~container) {
 			builder.previewModal(modal, over: screen, showButtonAlignment: showButtonAlignment)
 		})
+		#else
+		preconditionFailure("Should only be used in DEBUG builds.")
+		#endif
 	}
 
 	/// Returns a view that previews the full module starting from its root.
