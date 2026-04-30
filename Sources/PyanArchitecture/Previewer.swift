@@ -5,8 +5,6 @@
 //  Created by Perceval Archimbaud on 24/02/2026.
 //
 
-#if DEBUG
-
 import SwiftUI
 
 /// A helper that simplifies building SwiftUI previews for a module.
@@ -298,5 +296,3 @@ public extension Previewer {
 		registerSingleton(type: T.self, factory())
 	}
 }
-
-#endif
