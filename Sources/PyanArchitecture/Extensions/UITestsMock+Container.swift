@@ -5,6 +5,8 @@
 //  Created by Perceval Archimbaud on 19/03/2026.
 //
 
+#if DEBUG
+
 import Foundation
 
 public extension UITestsMock {
@@ -24,3 +26,5 @@ public extension UITestsMock {
 		container.registerSingleton(type: type, Self.fromEnvironment() as! T)
 	}
 }
+
+#endif
