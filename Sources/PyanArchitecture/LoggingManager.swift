@@ -60,7 +60,7 @@ public final class LoggingManager<Category: LogCategory, AppMetadataKey: Metadat
 		self.isBootstrapped.withLock { $0 = true }
 		self.isAutoBootstrapped.withLock { $0 = true }
 		self.factory = .init(label: Self.label) { label, provider in
-			MockLogHandler(label: label, category: "Uncategorized", storage: storage)
+			MockLogHandler(label: label, storage: storage)
 		}
 	}
 	#endif
