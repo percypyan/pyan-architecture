@@ -23,7 +23,7 @@ let testMacros: [String: Macro.Type] = [
 @Suite("@Presenter Macro")
 struct PresenterMacroTests {
 
-	@Test("adds _changeMonitoringRegistry and Presenter conformance")
+	@Test("adds _changeMonitoringRegistry, _changeMonitoringPerforms, and Presenter conformance")
 	func memberExpansion() {
 		assertMacroExpansion(
 			"""
@@ -40,6 +40,9 @@ struct PresenterMacroTests {
 
 				@ObservationIgnored
 				var _changeMonitoringRegistry: [String: any Equatable] = [:]
+
+				@ObservationIgnored
+				var _changeMonitoringPerforms: [String: Any] = [:]
 			}
 
 			extension MyPresenter: @MainActor Presenter {
@@ -83,6 +86,9 @@ struct PresenterMacroTests {
 
 				@ObservationIgnored
 				var _changeMonitoringRegistry: [String: any Equatable] = [:]
+
+				@ObservationIgnored
+				var _changeMonitoringPerforms: [String: Any] = [:]
 			}
 
 			extension MyPresenter: @MainActor Presenter {

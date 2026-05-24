@@ -35,6 +35,10 @@ extension PresenterMacro: MemberMacro {
 			@ObservationIgnored
 			var _changeMonitoringRegistry: [String: any Equatable] = [:]
 			""",
+			"""
+			@ObservationIgnored
+			var _changeMonitoringPerforms: [String: Any] = [:]
+			""",
 		]
 	}
 }

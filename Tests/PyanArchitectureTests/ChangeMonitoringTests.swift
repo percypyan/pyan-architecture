@@ -167,6 +167,39 @@ struct ChangeMonitoringTests {
 		#expect(presenter.callCount == 1)
 	}
 
+	// MARK: - Lifetime
+
+	@Test("presenter is not retained by the observation chain after cleanup")
+	func presenterIsReleasedAfterCleanup() async {
+		weak var weakPresenter: ChangeMonitoringPresenter?
+		do {
+			let presenter = ChangeMonitoringPresenter(router: MockRouter<TestBuilder>())
+			weakPresenter = presenter
+			presenter.monitorTextInitialFalse()
+			presenter.service.text = "post-register"
+			await Task.yield()
+			#expect(presenter.callCount == 1)
+			presenter._cleanupChangeMonitoring()
+		}
+		await Task.yield()
+		#expect(weakPresenter == nil)
+	}
+
+	@Test("cleanup stops perform from firing on subsequent changes")
+	func cleanupStopsObservation() async {
+		let presenter = ChangeMonitoringPresenter(router: MockRouter<TestBuilder>())
+
+		presenter.monitorTextInitialFalse()
+		presenter.service.text = "first"
+		await Task.yield()
+		#expect(presenter.callCount == 1)
+
+		presenter._cleanupChangeMonitoring()
+		presenter.service.text = "second"
+		await Task.yield()
+		#expect(presenter.callCount == 1)
+	}
+
 	@Test("only monitored value change trigger a perform")
 	func onlyPerformForMonitoredValueChange() async {
 		let presenter = ChangeMonitoringPresenter(router: MockRouter<TestBuilder>())

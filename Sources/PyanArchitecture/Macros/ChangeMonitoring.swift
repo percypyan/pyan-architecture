@@ -20,14 +20,32 @@ public extension Presenter {
 		runClosure: Bool,
 		perform: @escaping @MainActor (_ previous: Value?, _ current: Value) -> Void
 	) {
+		// Stored so the re-registration chain looks them up via `weakSelf` instead of capturing
+		// `self` strongly — see `_cleanupChangeMonitoring`.
+		let valueKey = "\(id).value"
+		let valueClosure: @MainActor () -> Value
+		if let stored = _changeMonitoringPerforms[valueKey] as? @MainActor () -> Value {
+			valueClosure = stored
+		} else {
+			valueClosure = { value() }
+			_changeMonitoringPerforms[valueKey] = valueClosure
+		}
+		_changeMonitoringPerforms[id] = perform
+
 		nonisolated(unsafe) weak let weakSelf = self
 		var current: Value!
 		withObservationTracking {
-			current = value()
+			current = valueClosure()
 		} onChange: {
 			RunLoop.main.perform {
 				MainActor.assumeIsolated {
-					weakSelf?._monitorChange(of: value(), id: id, runClosure: true, perform: perform)
+					guard let self = weakSelf,
+						  let storedValue = self._changeMonitoringPerforms[valueKey]
+							as? @MainActor () -> Value,
+						  let storedPerform = self._changeMonitoringPerforms[id]
+							as? @MainActor (Value?, Value) -> Void
+					else { return }
+					self._monitorChange(of: storedValue(), id: id, runClosure: true, perform: storedPerform)
 				}
 			}
 		}

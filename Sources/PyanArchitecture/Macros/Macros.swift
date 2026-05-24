@@ -9,7 +9,8 @@
 ///
 /// Applying `@Presenter` to a `class` will:
 /// 1. Add conformance to the ``Presenter`` protocol.
-/// 2. Inject a private `_changeMonitoringRegistry` property used by ``MonitorChange(of:initial:perform:)``.
+/// 2. Inject private `_changeMonitoringRegistry` and `_changeMonitoringPerforms`
+///    properties used by ``MonitorChange(of:initial:perform:)``.
 ///
 /// You must also apply `@Observable` to the class for observation support.
 /// You must still provide the `router` property and `Builder` typealias
@@ -27,7 +28,7 @@
 ///     }
 /// }
 /// ```
-@attached(member, names: named(_changeMonitoringRegistry))
+@attached(member, names: named(_changeMonitoringRegistry), named(_changeMonitoringPerforms))
 @attached(extension, conformances: Presenter)
 public macro Presenter() = #externalMacro(module: "PyanArchitectureMacros", type: "PresenterMacro")
 

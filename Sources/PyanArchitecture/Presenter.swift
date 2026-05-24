@@ -45,6 +45,12 @@ public protocol Presenter: AnyObject, Observable {
 	/// Synthesized automatically by `@Presenter`. Do not modify directly.
 	var _changeMonitoringRegistry: [String: any Equatable] { get set }
 
+	/// Storage used internally by ``MonitorChange(of:initial:perform:)`` to retain `perform`
+	/// closures across observation cycles without leaking the presenter.
+	///
+	/// Synthesized automatically by `@Presenter`. Do not modify directly.
+	var _changeMonitoringPerforms: [String: Any] { get set }
+
 	/// Called when the screen appears. The default implementation does nothing.
 	func onAppear()
 
@@ -54,9 +60,18 @@ public protocol Presenter: AnyObject, Observable {
 
 public extension Presenter {
 	var _changeMonitoringRegistry: [String: any Equatable] { get { [:] } set {} }
+	var _changeMonitoringPerforms: [String: Any] { get { [:] } set {} }
 
 	func onAppear() {}
 	func onDisappear() {}
+
+	/// Drops every `#MonitorChange` registration on this presenter. Called by ``Screen`` on
+	/// disappear to release `perform` closures that would otherwise retain `self` indefinitely.
+	@MainActor
+	func _cleanupChangeMonitoring() {
+		_changeMonitoringPerforms.removeAll()
+		_changeMonitoringRegistry.removeAll()
+	}
 }
 
 #if DEBUG

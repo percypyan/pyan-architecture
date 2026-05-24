@@ -40,6 +40,9 @@ public extension Screen {
 	var body: some View {
 		screenBody
 			.onAppear(perform: presenter.onAppear)
-			.onDisappear(perform: presenter.onDisappear)
+			.onDisappear {
+				presenter.onDisappear()
+				presenter._cleanupChangeMonitoring()
+			}
 	}
 }
