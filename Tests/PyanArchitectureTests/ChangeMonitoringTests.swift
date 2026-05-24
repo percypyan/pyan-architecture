@@ -76,12 +76,22 @@ final class ChangeMonitoringPresenter {
 			self.capturedOther = self.service.text
 		}
 	}
+
+	func monitorIsPositive() {
+		#MonitorChange(of: service.isPositive, initial: false) { previous, current in
+			self.capturedPrevious = previous
+			self.capturedCurrent = current
+			self.callCount += 1
+		}
+	}
 }
 
 @Observable
 final class ObservableService {
 	var text: String = "initial"
 	var count: Int = 0
+
+	var isPositive: Bool { count > 0 }
 }
 
 // MARK: - Tests
@@ -196,6 +206,33 @@ struct ChangeMonitoringTests {
 
 		presenter._cleanupChangeMonitoring()
 		presenter.service.text = "second"
+		await Task.yield()
+		#expect(presenter.callCount == 1)
+	}
+
+	@Test("computed expression no-op change does not call perform")
+	func computedExpressionNoOpChange() async {
+		// `isPositive` reads `count`; framework fires onChange per stored field, not per result.
+		let presenter = ChangeMonitoringPresenter(router: MockRouter<TestBuilder>())
+
+		presenter.service.count = 1
+		presenter.monitorIsPositive()
+		#expect(presenter.callCount == 0)
+
+		// 1 -> 2: `isPositive` stays true, perform must NOT fire.
+		presenter.service.count = 2
+		await Task.yield()
+		#expect(presenter.callCount == 0)
+
+		// 2 -> 0: `isPositive` flips true -> false, perform fires once.
+		presenter.service.count = 0
+		await Task.yield()
+		#expect(presenter.callCount == 1)
+		#expect(presenter.capturedPrevious as? Bool == true)
+		#expect(presenter.capturedCurrent as? Bool == false)
+
+		// 0 -> -3: `isPositive` stays false, perform must NOT fire.
+		presenter.service.count = -3
 		await Task.yield()
 		#expect(presenter.callCount == 1)
 	}

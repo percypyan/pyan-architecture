@@ -50,11 +50,12 @@ public extension Presenter {
 			}
 		}
 
+		let isFirstRegistration = _changeMonitoringRegistry[id] == nil
 		let previous = _changeMonitoringRegistry[id] as? Value
 		_changeMonitoringRegistry[id] = current
 
-		if runClosure {
-			perform(previous, current)
-		}
+		// Skip no-op re-entries (`onChange` fires per tracked property, not per resolved value).
+		guard runClosure, isFirstRegistration || previous != current else { return }
+		perform(previous, current)
 	}
 }
